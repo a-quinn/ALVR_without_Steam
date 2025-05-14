@@ -167,7 +167,7 @@ def update_active_protocol():
         print("Registry key was set to this executable changing to Steam executable.")
         # set registry key to steam executable
         set_registry_key(f'"{steam_path}" -- "%1"')
-    elif protocol_exe == steam_path:
+    elif str(protocol_exe).lower() == str(steam_path).lower():
         print("Registry key was set to steam executable changing to this executable.")
         # set registry key to this executable
         # get the path to this executable
