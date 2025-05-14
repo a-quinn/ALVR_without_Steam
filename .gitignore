@@ -1,0 +1,6 @@
+.redirect/
+__pycache__/
+*.pyc
+build/
+#dist/ # include once Github Workflow is set up
+*.spec
