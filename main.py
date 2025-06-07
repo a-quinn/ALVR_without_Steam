@@ -217,6 +217,14 @@ def main():
         update_active_protocol()
         sleep(2)
         exit(0)
+
+    # add help message
+    if sys.argv[1] == "--help" or sys.argv[1] == "-h":
+        print("If this program is run with no arguments, it will update the active registry key for the Steam browser protocol.")
+        print("Updating the active registry key will toggle the registry key between this executable and the Steam executable.")
+        print("This program will run the SteamVR executable directly if the protocol is 'steam://rungameid/250820'.")
+        print("Otherwise, it will run the command with Steam if Steam is installed.")
+        exit(0)
     
     print(sys.argv)
     # "C:\local\projects\steam_run_shortcut\dist\steam_run_shortcut\steam_run_shortcut.exe" -- "%1"
