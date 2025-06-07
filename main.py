@@ -2,9 +2,11 @@
 
 from pathlib import Path
 from sys import exit
-from subprocess import Popen
+from subprocess import Popen, CREATE_NO_WINDOW, DETACHED_PROCESS, CREATE_NEW_PROCESS_GROUP
 import sys
 from time import sleep
+import traceback
+from os import _exit
 
 # This program allows running SteamVR from calls to the Steam protocol without needing Steam installed.
 # This will replace the steam://rungameid/250820 command with a call to the SteamVR executable.
@@ -148,7 +150,7 @@ def update_active_protocol():
         print("Registry key does not exist. Creating it.")
         # set registry key to steam executable
         create_base_registry_key()
-        set_registry_key(f'"{this_exe_path}" -- "%1"')
+        set_registry_key(f'conhost.exe "{this_exe_path}" -- "%1"') # use conhost to avoid any custom terminal windows
         return
     
     # Toggle the registry key
@@ -171,7 +173,7 @@ def update_active_protocol():
         print("Registry key was set to steam executable changing to this executable.")
         # set registry key to this executable
         # get the path to this executable
-        set_registry_key(f'"{this_exe_path}" -- "%1"')
+        set_registry_key(f'conhost.exe "{this_exe_path}" -- "%1"') # use conhost to avoid any custom terminal windows
     else:
         print(f"Registry key was set to something else ({protocol_exe}). Doing nothing.")
         return
@@ -193,16 +195,23 @@ def run_steamvr():
         sleep(2)
         return
     
+    #cmd = ['cmd.exe', '/c', str(steamvr_path)] # working
+    cmd = ['cmd.exe', '/c', 'start', '', str(steamvr_path)] # working
+    #cmd = [str(steamvr_path)] # working
+    #print(f"Running SteamVR by: {cmd}")
+    
     # spawn the process without waiting for it to finish
     flags = 0
-    flags |= 0x00000008  # DETACHED_PROCESS
-    flags |= 0x00000200  # CREATE_NEW_PROCESS_GROUP
-    flags |= 0x08000000  # CREATE_NO_WINDOW
-    Popen([str(steamvr_path)], shell=False, creationflags=flags, close_fds=True)
+    #flags |= CREATE_NEW_CONSOLE
+    flags |= DETACHED_PROCESS
+    flags |= CREATE_NEW_PROCESS_GROUP
+    flags |= CREATE_NO_WINDOW
+    Popen(cmd, shell=True, creationflags=flags, close_fds=True)
+    _exit(0) # ignore cleanup, just exit immediately
 
 
-if __name__ == "__main__":
-    
+def main():
+
     if len(sys.argv) < 3:
         print("No arguments provided. Updating active registry key.")
         update_active_protocol()
@@ -243,14 +252,25 @@ if __name__ == "__main__":
             exit(0)
 
         # spawn the process without waiting for it to finish
+        cmd = ['cmd.exe', '/c', 'start', '', str(steam_path), protocol] # working
+        
         flags = 0
-        flags |= 0x00000008
-        flags |= 0x00000200
-        flags |= 0x08000000
-        Popen([str(steam_path), protocol], shell=False, creationflags=flags, close_fds=True)
+        flags |= DETACHED_PROCESS
+        flags |= CREATE_NEW_PROCESS_GROUP
+        flags |= CREATE_NO_WINDOW
+        Popen(cmd, shell=True, creationflags=flags, close_fds=True)
+        _exit(0) # ignore cleanup, just exit immediately
 
     else:
         print("Invalid protocol format.")
 
     sleep(2)
     exit(0)
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception as e:
+        traceback.print_exc()
+        sleep(2)
+        exit(1)
