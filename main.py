@@ -234,7 +234,7 @@ def main():
 
     # add help message
     if sys.argv[1] == "--help" or sys.argv[1] == "-h":
-        print("Version 1.0.1")
+        print("Version 1.0.2")
         print("If this program is run with no arguments, it will update the active registry key for the Steam browser protocol.")
         print("Updating the active registry key will toggle the registry key between this executable and the Steam executable.")
         print("This program will run the SteamVR executable directly if the protocol is 'steam://rungameid/250820'.")
