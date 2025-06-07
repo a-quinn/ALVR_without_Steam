@@ -197,16 +197,30 @@ def run_steamvr():
     
     #cmd = ['cmd.exe', '/c', str(steamvr_path)] # working
     cmd = ['cmd.exe', '/c', 'start', '', str(steamvr_path)] # working
+    #cmd = ["cmd.exe", "/c", "timeout", "/t", "1", ">", "nul", "&&", "start", "", str(steamvr_path)] # working
+    
+    # we can delay the start to avoid SteamVR locking a VCRUNTIME140.dll file in the temp _MEIxxxxx directory.
+    # this is so pysinstaller has time to clean up the temporary directory before the executable has started.
+    #cmd = ["cmd.exe", "/q", "/c", "timeout", "/t", "1", ">", "nul", "&&", "start", "", str(steamvr_path)] # working
+    
     #cmd = [str(steamvr_path)] # working
     #print(f"Running SteamVR by: {cmd}")
-    
+
     # spawn the process without waiting for it to finish
-    flags = 0
-    #flags |= CREATE_NEW_CONSOLE
-    flags |= DETACHED_PROCESS
-    flags |= CREATE_NEW_PROCESS_GROUP
-    flags |= CREATE_NO_WINDOW
-    Popen(cmd, shell=True, creationflags=flags, close_fds=True)
+    Popen(
+        cmd,
+        # set cwd to avoid SteamVR locking a VCRUNTIME140.dll file in the temp _MEIxxxxx directory.
+        # this this method is unreliable, we can use the delay method above instead.
+        cwd=steamvr_path.parent,  # set the current working directory to the parent of this executable
+        shell=True,
+        creationflags=DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP | CREATE_NO_WINDOW,
+        close_fds=True,
+        #env={
+        #    **environ,
+        #    "PYINSTALLER_RESET_ENVIRONMENT": "1",
+        #    "PYI_PROCESS_LEVEL_SUBPROCESS": "2"
+        #    }
+        )
     _exit(0) # ignore cleanup, just exit immediately
 
 
